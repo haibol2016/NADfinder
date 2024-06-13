@@ -18,6 +18,12 @@
 #' will be treated as background, with 25 percentile as default.
 #' @param chrom.level.background logical(1): TRUE or FALSE, default to TRUE,
 #' use chromosome-level background to calculate z-score.
+#' @param future.scheduling An integer(1), average number of futures ("chunks")
+#' per worker for multithreading using the [future.apply::future_lapply()]
+#' function. If 0.0, then a single future is used to process all elements of
+#' X. If 1.0 or TRUE, then one future per worker is used. If 2.0, then each
+#' worker will process two futures (if there are enough elements in X). If
+#' Inf or FALSE, then one future per element of X is used.
 #' @param ... Parameters could be passed to \link{butterFilter}.
 #' @importFrom methods is
 #' @importFrom future.apply future_lapply
@@ -53,6 +59,7 @@ smoothRatiosByChromosome <- function(se,
                                      zscoreAssay = "zscore",
                                      backgroundPercentage = 0.25,
                                      chrom.level.background = TRUE,
+                                     future.scheduling = 1L,
                                      ...)
 {
     stopifnot(is(se, "RangedSummarizedExperiment"))
@@ -109,7 +116,7 @@ smoothRatiosByChromosome <- function(se,
             assays(.ele)[[zscoreAssay]] <- zscore
         }
         .ele
-    })
+    }, future.scheduling = future.scheduling)
     se <- SimpleList(se)
     se
 }
