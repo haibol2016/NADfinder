@@ -1,11 +1,10 @@
 #' Backgound correction and signal smoothing per chromosome
 #'
 #' Split the ratios by chromosome and do background correction and signal
-#' smoothing.
+#' smoothing. The future_lapply() function is used for multithreading.
 #'
 #' @param se An [SummarizedExperiment::RangedSummarizedExperiment-class] object.
-#' with log2-transformed ratios, CPMRatios or OddRatios. Output of \link{log2se}
-## Why not include these parameters in tileCount.R??
+#' with log2-transformed ratios, CPMRatios or OddRatios. Output of \link{log2se}.
 #' @param chr A character vector, used to filter out seqnames. It should be the
 #' chromosome names to be kept.
 #' @param ratioAssay The name of assay in se, which store the values
@@ -21,13 +20,20 @@
 #' use chromosome-level background to calculate z-score.
 #' @param ... Parameters could be passed to \link{butterFilter}.
 #' @importFrom methods is
+#' @importFrom future.apply future_lapply
 #' @export
 #' @return A \link[S4Vectors:SimpleList-class]{SimpleList} of
 #' [SummarizedExperiment::RangedSummarizedExperiment-class] with smoothed
 #' ratios.
 #' @author Jianhong Ou, Haibo Liu and Julie Zhu
 #' @examples
-#'
+#' library(future.apply)
+#' if (.Platform$OS.type == "windows")
+#' {
+#'     plan(sequential)
+#' } else {
+#'     plan(multisession)
+#' }
 #' data(single.count)
 #' se <- single.count
 #' dat <- log2se(se, nucleolusCols="N18.subsampled.srt.bam",
@@ -53,7 +59,6 @@ smoothRatiosByChromosome <- function(se,
     stopifnot(length(ratioAssay) == 1)
     stopifnot(ratioAssay %in% names(assays(se)))
 
-
     ## for computing z-score using global background
     if (!chrom.level.background)
     {
@@ -72,33 +77,36 @@ smoothRatiosByChromosome <- function(se,
     se <- split(se, as.character(seqnames(rowRanges(se))))
     se <- se[names(se) %in% chr]
 
-    se <- lapply(se, function(.ele)
+    se <- future_lapply(se, function(.ele)
     {
         if (!is(assays(.ele)[[ratioAssay]], "matrix"))
         {
             assays(.ele)[[ratioAssay]] <- as.matrix(assays(.ele)[[ratioAssay]])
         }
-        assays(.ele)[[backgroundCorrectedAssay]] <-
-            apply(assays(.ele)[[ratioAssay]],
-                  2, backgroundCorrection)
 
-        assays(.ele)[[smoothedRatioAssay]] <-
-            apply(assays(.ele)[[backgroundCorrectedAssay]],
-                  2, function(.e)
-                      butterFilter(.e, ...))
+        bkgcorrect <- apply(assays(.ele)[[ratioAssay]],
+                            2, backgroundCorrection)
+        rownames(bkgcorrect) <- rownames(assays(.ele)[[ratioAssay]])
+        assays(.ele)[[backgroundCorrectedAssay]] <- bkgcorrect
+
+        smooth <- apply(assays(.ele)[[backgroundCorrectedAssay]],
+                        2, function(.e) butterFilter(.e))
+        rownames(smooth) <- rownames(assays(.ele)[[ratioAssay]])
+        assays(.ele)[[smoothedRatioAssay]] <- smooth
 
         if (chrom.level.background)
         {
-            assays(.ele)[[zscoreAssay]] <-
-                apply(assays(.ele)[[smoothedRatioAssay]],
+            zscore <- apply(assays(.ele)[[smoothedRatioAssay]],
                       2, function(.e)
                           zscoreOverBck(.e, backgroundPercentage))
+            rownames(zscore) <- rownames(assays(.ele)[[ratioAssay]])
+            assays(.ele)[[zscoreAssay]] <- zscore
 
         } else {
-            assays(.ele)[[zscoreAssay]] <-
-                apply(assays(.ele)[[smoothedRatioAssay]],
-                      2, function(.e) {
-                          (.e - pop.mean) / pop.sd })
+            zscore <- apply(assays(.ele)[[smoothedRatioAssay]],
+                      2, function(.e) {(.e - pop.mean) / pop.sd})
+            rownames(zscore) <- rownames(assays(.ele)[[ratioAssay]])
+            assays(.ele)[[zscoreAssay]] <- zscore
         }
         .ele
     })

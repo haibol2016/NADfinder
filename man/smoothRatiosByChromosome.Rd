@@ -18,7 +18,7 @@ smoothRatiosByChromosome(
 }
 \arguments{
 \item{se}{An \link[SummarizedExperiment:RangedSummarizedExperiment-class]{SummarizedExperiment::RangedSummarizedExperiment} object.
-with log2-transformed ratios, CPMRatios or OddRatios. Output of \link{log2se}}
+with log2-transformed ratios, CPMRatios or OddRatios. Output of \link{log2se}.}
 
 \item{chr}{A character vector, used to filter out seqnames. It should be the
 chromosome names to be kept.}
@@ -47,10 +47,16 @@ ratios.
 }
 \description{
 Split the ratios by chromosome and do background correction and signal
-smoothing.
+smoothing. The future_lapply() function is used for multithreading.
 }
 \examples{
-
+library(future.apply)
+if (.Platform$OS.type == "windows")
+{
+    plan(sequential)
+} else {
+    plan(multisession)
+}
 data(single.count)
 se <- single.count
 dat <- log2se(se, nucleolusCols="N18.subsampled.srt.bam",

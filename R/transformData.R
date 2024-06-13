@@ -47,9 +47,15 @@
 #' transformData(seq_len(10), 10:1, transformation = "log2Ratio")
 #' @author Julie Zhu
 
-transformData <- function(A, B, seqnames.A, seqnames.B, pseudo.count = 1L,
-    transformation = c("log2OddsRatio", "log2CPMRatio", "log2Ratio"),
-    chrom.level.lib = TRUE, lib.size.A, lib.size.B){
+transformData <-
+    function(A, B,
+             seqnames.A, seqnames.B,
+             pseudo.count = 1L,
+             transformation = c("log2OddsRatio",
+                                "log2CPMRatio",
+                                "log2Ratio"),
+             chrom.level.lib = TRUE,
+             lib.size.A, lib.size.B) {
     stopifnot(length(A) == length(B))
     transformation <- match.arg(transformation)
     stopifnot(inherits(A, c("numeric", "integer")))

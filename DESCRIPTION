@@ -28,7 +28,8 @@ Depends: R (>= 3.5), BiocGenerics, IRanges, GenomicRanges, S4Vectors,
          SummarizedExperiment
 Imports: graphics, methods, baseline, signal, GenomicAlignments,Rsubread,
         GenomeInfoDb, rtracklayer, limma, trackViewer, stats, utils, 
-        Rsamtools, metap, EmpiricalBrownsMethod,ATACseqQC, corrplot, csaw
+        Rsamtools, metap, EmpiricalBrownsMethod,ATACseqQC, corrplot, csaw,
+        future.apply
 Suggests: RUnit, BiocStyle, knitr, testthat, BiocManager, rmarkdown,
         BSgenome.Mmusculus.UCSC.mm10
 biocViews: Sequencing, DNASeq, GeneRegulation, PeakDetection

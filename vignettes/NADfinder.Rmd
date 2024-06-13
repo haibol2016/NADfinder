@@ -18,6 +18,7 @@ suppressPackageStartupMessages({
   library(NADfinder)
   library(SummarizedExperiment)
   library(rtracklayer)
+  library(future.apply)
 })
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, eval=TRUE)
 ```
@@ -72,6 +73,14 @@ step <- 5000
 backgroundPercentage <- 0.25
 ## Count the reads for each window with a given step in the genome.
 ## The output will be a GRanges object.
+
+## using future for multithreading
+ if (.Platform$OS.type == "windows")
+ {
+     plan(sequential)
+ } else {
+     plan(multisession)
+ }
 ```
 
 ```{r eval=TRUE}
