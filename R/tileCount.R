@@ -2,12 +2,15 @@
 #'
 #' Count reads overlapping a set of genimc features represented as
 #' genomic ranges. This function does not work for parallel.
-#' @param features A object of \link[GenomicRanges:GRanges-class]{GRanges} representing the
+#' @param features A object of \link[GenomicRanges:GRanges-class]{GRanges}
+#' representing the
 #' feature regions to be counted.
 #' @param reads An object that represents the data to be counted. See
-#' \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}. If reads are more than 1 bam files,
-#' it should be a vector of character with full path, otherwise current working directory 
-#' is the default directory. For paired end reads, 
+#' \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}.
+#' If reads are more than 1 bam files,
+#' it should be a vector of character with full path, otherwise current
+#' working directory
+#' is the default directory. For paired end reads,
 #' @param ignore.strand logical(1). ignore strand?
 #' @param inter.feature not used. This parameter is required by
 #' \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}.
@@ -19,7 +22,7 @@
 IntersectionNotStrict <-function(features,
                                  reads,
                                  ignore.strand = TRUE,
-                                 inter.feature = FALSE) 
+                                 inter.feature = FALSE)
 {
     ## NOT work for parallel
     ov <- findOverlaps(reads,
@@ -29,15 +32,16 @@ IntersectionNotStrict <-function(features,
     countSubjectHits(ov)
 }
 
-computeLibSizeChrom <- function(aln_list)
+computeLibSizeChrom <-
+    function(aln_list)
      {
          stopifnot(is.list(aln_list))
          lib_size_list <- lapply(aln_list,
              function(aln) {
                  qname <- names(aln)
                  if (is.null(qname))
-                     stop(wmsg("Some of the GAlignments or
-GAlignmentsList ",
+                     stop(wmsg("Some of the GAlignments or ",
+                               "GAlignmentsList ",
                                "objects in 'aln_list' don't have names. ",
                                "Did you use 'use.names=TRUE' when loading ",
                                "them with readGAlignments() or ",
@@ -65,8 +69,8 @@ GAlignmentsList ",
 
 #' Perform overlap queries between reads and genome by windows
 #'
-#' tileCount extends \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps} by finding coverage for
-#' each fixed window in the whole genome
+#' tileCount extends \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}
+#' by finding coverage for each fixed window in the whole genome
 #'
 #' @param reads A \link[GenomicRanges:GRanges-class]{GRanges},
 #' \link[GenomicRanges:GRangesList-class]{GRangesList} (should be one read per list element),
@@ -74,14 +78,17 @@ GAlignmentsList ",
 #' \link[GenomicAlignments:GAlignmentsList-class]{GAlignmentsList},
 #' \link[GenomicAlignments:GAlignmentPairs-class]{GAlignmentPairs} or
 #' \link[Rsamtools:BamFile-class]{BamFileList} object that represents the data to be
-#' counted by \code{\link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}}. If reads are more than 1 bam files,
-#' it should be a vector of character with full path, otherwise current working directory 
+#' counted by \code{\link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}}.
+#' If reads are more than 1 bam files,
+#' it should be a vector of character with full path, otherwise current working directory
 #' is the default directory.
-#' @param genome A BSgenome object from/on which to get/set the sequence and metadata information.
+#' @param genome A BSgenome object from/on which to get/set the sequence and
+#' metadata information.
 #' @param windowSize numeric(1) or integer(1). Size of the windows.
 #' @param step numeric(1) or integer(1). Step of generating silding windows.
 #' @param mode One of the pre-defined count methods.
-#' @param excludeChrs A vector of string: chromosomes/scaffolds of no interest for NAD analysis.
+#' @param excludeChrs A vector of string: chromosomes/scaffolds of no interest
+#' for NAD analysis.
 #' see \link[GenomicAlignments:summarizeOverlaps-methods]{summarizeOverlaps}.
 #' default is countByOverlaps, alia of countOverlaps(features, reads, ignore.strand=ignore.strand)
 #' @param dataOverSamples logical(1). Data over several samples when use
@@ -110,23 +117,16 @@ GAlignmentsList ",
 #'     fls <- list.files(system.file("extdata", package="NADfinder"),
 #'     recursive=FALSE, pattern="*bam$", full=TRUE)
 #'     names(fls) <- basename(fls)
-#'     if (!require(BSgenome.Mmusculus.UCSC.mm10))
-#'     {
-#'         if (!requireNamespace("BiocManager", quietly=TRUE))
-#'         install.packages("BiocManager")
-#'         BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
-#'         library(BSgenome.Mmusculus.UCSC.mm10)
-#'     }
-#'     se <- tileCount(reads = fls, 
+#'     library(BSgenome.Mmusculus.UCSC.mm10)
+#'
+#'     se <- tileCount(reads = fls,
 #'                     genome = Mmusculus,
-#'                     excludeChrs = c("chrM", paste0("chr", c(1:17,19)), 
-#'                                     "chrX", "chrY"), 
+#'                     excludeChrs = c("chrM", paste0("chr", c(1:17,19)),
+#'                                     "chrX", "chrY"),
 #'                     windowSize=50000, step=10000)
 #' }
 #'
-#' 
-
-
+#'
 
 tileCount<- function(reads,
                       genome,
@@ -135,11 +135,13 @@ tileCount<- function(reads,
                       step = 10000,
                       mode = IntersectionNotStrict,
                       dataOverSamples = FALSE,
-                      ...) 
+                      ...)
 {
-    stopifnot(all(grepl(".bam$", reads)), all(file.exists(paste0(reads, ".bai"))))
+    stopifnot(all(grepl(".bam$", reads)),
+              all(file.exists(paste0(reads, ".bai"))))
     stopifnot(is(genome, "BSgenome"))
-    stopifnot(windowSize %% 1 == 0, step %% 1 ==0, windowSize > 0, step > 0, step < windowSize)
+    stopifnot(windowSize %% 1 == 0, step %% 1 ==0, windowSize > 0,
+              step > 0, step < windowSize)
 
     targetRegions <- as(seqinfo(genome), "GRanges")
 
@@ -158,19 +160,23 @@ tileCount<- function(reads,
 
     ## aln is a list of list of lists
     lib.size.chrom <- computeLibSizeChrom(aln_list)
-    
+
     ## remove excludeChr from lib.size.chrom
-    lib.size.chrom <- lib.size.chrom[!rownames(lib.size.chrom) %in% excludeChrs, drop = FALSE, ]
-    
-    ## filtering GRanges to keep only those chromosomal scaffolds that are in the BAM file
-    targetRegions <- targetRegions[seqnames(targetRegions) %in% rownames(lib.size.chrom)]
+    lib.size.chrom <- lib.size.chrom[!rownames(lib.size.chrom) %in%
+                                         excludeChrs, drop = FALSE, ]
+
+    ## filtering GRanges to keep only those chromosomal scaffolds that are in
+    ## the BAM file
+    targetRegions <- targetRegions[seqnames(targetRegions) %in%
+                                       rownames(lib.size.chrom)]
     tileTargetRegions <-slidingWindows(x = targetRegions,
                                        width = windowSize,
                                        step = step)
     tileTargetRegionsLen <- elementNROWS(tileTargetRegions)
     tileTargetRegions <- unlist(tileTargetRegions)
-    mcols(tileTargetRegions)$oid <- rep(seq_along(targetRegions),tileTargetRegionsLen)
-    
+    mcols(tileTargetRegions)$oid <-
+        rep(seq_along(targetRegions),tileTargetRegionsLen)
+
      rse_list <- lapply(aln_list,
          function(aln) summarizeOverlaps(features=tileTargetRegions,
                                          reads=aln,
