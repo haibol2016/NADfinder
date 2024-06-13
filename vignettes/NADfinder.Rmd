@@ -163,7 +163,7 @@ legend("topright",
        legend = c("raw_ratio", "background_corrected", "smoothed"), 
        fill = c("black", "green", "red"))
 ## call peaks for each chromosome
-peaks <- lapply(datList, trimPeaks, 
+peaks <- future_lapply(datList, trimPeaks, 
                 backgroundPercentage=backgroundPercentage, 
                 cutoffAdjPvalue=0.05, countFilter=1000)
 ## plot the peaks in "chr18"
@@ -247,7 +247,7 @@ se <- log2se(se,
              transformation = "log2CPMRatio")
 seList<- smoothRatiosByChromosome(se, chr="chr18")
 cumulativePercentage(seList[["chr18"]])
-peaks <- lapply(seList, callPeaks, 
+peaks <- future_lapply(seList, callPeaks, 
                 cutoffAdjPvalue=0.05, countFilter=1)
 peaks <- unlist(GRangesList(peaks))
 peaks

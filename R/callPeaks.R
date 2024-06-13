@@ -2,9 +2,8 @@
 #' Call peaks using transformed, background corrected, and smoothed ratios with
 #' biological replicates
 #'
-#' Use limma to calculate p-values for NADs
-#' By default, use the mean smoothed ratio for each peak region to calculate
-#' p-values
+#' Use limma to calculate p-values for NADs. By default, use the mean smoothed
+#' ratio for each peak region to calculate p-values
 #'
 #' @param se A
 #' [SummarizedExperiment::RangedSummarizedExperiment-class] object

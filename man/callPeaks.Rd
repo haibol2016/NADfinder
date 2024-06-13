@@ -61,9 +61,8 @@ and "adj.P.Val", where "AveSig" means average signal such as average
 log2OddsRatio, log2CPMRatio or log2Ratio.
 }
 \description{
-Use limma to calculate p-values for NADs
-By default, use the mean smoothed ratio for each peak region to calculate
-p-values
+Use limma to calculate p-values for NADs. By default, use the mean smoothed
+ratio for each peak region to calculate p-values
 }
 \examples{
 
