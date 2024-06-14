@@ -79,7 +79,7 @@ backgroundPercentage <- 0.25
  {
      plan(sequential)
  } else {
-     plan(multisession)
+     plan(multicore)
  }
 ncores <- length(availableWorkers())
 ```
@@ -170,7 +170,7 @@ future.scheduling <- ifelse(schedule_jobs >= 1,
 
 peaks <- future_lapply(datList, trimPeaks, 
                 backgroundPercentage=backgroundPercentage, 
-                cutoffAdjPvalue=0.05, countFilter=1000,
+                cutoffAdjPvalue=0.05, countFilter=1,
                 future.scheduling = future.scheduling)
 ## plot the peaks in "chr18"
 peaks.subset <- countOverlaps(rowRanges(chr18subset), peaks$chr18)>=1
@@ -214,7 +214,7 @@ ws <- 50000
 step <- 5000
 ```
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 genomeSW_SAF <-
      generateGenomeSAF(bamfile = bamFiles[1],
                        windowSize = 50000L,
